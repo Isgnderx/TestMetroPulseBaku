@@ -10,7 +10,6 @@ import {
     LeaderboardFilter,
     LeaderboardResponse,
     MetroLine,
-    ScoredExit,
     StationType,
     StationWithDemand,
     WeatherCondition,

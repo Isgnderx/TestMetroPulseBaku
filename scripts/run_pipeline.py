@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import logging
 from pathlib import Path
+from typing import Optional
 
 from etl.config import load_config
 from etl.jobs.daily_demand_job import run_daily_demand_job
@@ -27,8 +28,17 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    config = load_config()
-    configure_logging(config.log_level)
+    config: Optional[object] = None
+
+    should_run_demand = bool(args.demand_file)
+    should_run_exits = bool(args.exits_file)
+    should_run_weather = not args.skip_weather
+
+    if should_run_demand or should_run_exits or should_run_weather:
+        config = load_config()
+        configure_logging(config.log_level)
+    else:
+        configure_logging("INFO")
 
     LOGGER.info("Starting ETL pipeline")
 

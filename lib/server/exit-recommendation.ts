@@ -32,7 +32,7 @@ interface DistanceEngine {
 }
 
 class StraightLineDistanceEngine implements DistanceEngine {
-    mode: "straight-line-distance" = "straight-line-distance";
+    readonly mode = "straight-line-distance" as const;
 
     getDistanceMeters(from: { lat: number; lon: number }, to: { lat: number; lon: number }): number {
         const toRad = (value: number) => (value * Math.PI) / 180;
