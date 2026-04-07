@@ -40,26 +40,31 @@ export default async function InsightsPage() {
                     </Alert>
                 )}
 
-                <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-surface-800/70 p-5 sm:p-6">
-                    <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-metro-blue/20 blur-3xl animate-pulse" />
-                    <div className="pointer-events-none absolute -left-12 -bottom-16 h-40 w-40 rounded-full bg-metro-amber/20 blur-3xl animate-pulse" />
+                <section className="weather-card-enter relative overflow-hidden rounded-2xl border border-white/10 bg-surface-800/70 p-5 sm:p-6">
+                    <div className="weather-orb pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-metro-blue/20 blur-3xl" />
+                    <div className="weather-orb weather-orb-delay pointer-events-none absolute -left-12 -bottom-16 h-40 w-40 rounded-full bg-metro-amber/20 blur-3xl" />
+                    <div className="pointer-events-none absolute right-3 top-3 z-0 flex items-center gap-2 opacity-80 sm:right-4 sm:top-4">
+                        <CloudSun className="weather-float-a h-4 w-4 text-metro-teal/80" />
+                        <Wind className="weather-float-b h-3.5 w-3.5 text-sky-300/75" />
+                        <Droplets className="weather-float-c h-3.5 w-3.5 text-metro-blue/80" />
+                    </div>
 
-                    <div className="relative flex items-start justify-between gap-4">
-                        <div>
+                    <div className="relative z-10 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                        <div className="min-w-0">
                             <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-muted-foreground">
-                                <CloudSun className="h-3.5 w-3.5 text-metro-teal" />
+                                <CloudSun className="weather-float-a h-3.5 w-3.5 text-metro-teal" />
                                 Live weather now
                             </div>
                             <h2 className="text-xl font-semibold text-foreground">
                                 {weather ? `${weather.tempC}°C` : "Weather unavailable"}
                             </h2>
-                            <p className="mt-1 text-sm text-muted-foreground">
+                            <p className="mt-1 text-sm leading-relaxed text-muted-foreground break-words [overflow-wrap:anywhere]">
                                 {weather
-                                    ? `Feels like ${weather.feelsLikeC}°C · ${weather.condition.replace("_", " ")}`
+                                    ? `Feels like ${weather.feelsLikeC}°C · ${weather.condition.replace(/_/g, " ")}`
                                     : "Could not load current weather observation."}
                             </p>
                         </div>
-                        <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-muted-foreground">
+                        <div className="shrink-0 self-start rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-muted-foreground">
                             Source: {weatherResult.meta?.source ?? "mock"}
                         </div>
                     </div>
@@ -73,7 +78,9 @@ export default async function InsightsPage() {
 
                     <div className="relative mt-4 rounded-xl border border-white/10 bg-surface-900/60 p-4 text-sm text-muted-foreground">
                         <div className="mb-1 font-medium text-foreground">Demand impact note</div>
-                        <p>{note ?? "Weather-based demand explanation is not available right now."}</p>
+                        <p className="leading-relaxed break-words [overflow-wrap:anywhere]">
+                            {note ?? "Weather-based demand explanation is not available right now."}
+                        </p>
                     </div>
                 </section>
 
@@ -121,12 +128,12 @@ function WeatherMetric({
     value: string;
 }) {
     return (
-        <div className="rounded-xl border border-white/10 bg-surface-900/50 px-3 py-2.5">
-            <div className="flex items-center gap-2 text-muted-foreground">
+        <div className="rounded-xl border border-white/10 bg-surface-900/50 px-3 py-2.5 weather-metric-enter">
+            <div className="flex items-center gap-2 text-muted-foreground min-w-0">
                 <Icon className="h-3.5 w-3.5" />
-                <p className="text-[11px] uppercase tracking-wide">{label}</p>
+                <p className="truncate text-[11px] uppercase tracking-wide">{label}</p>
             </div>
-            <p className="mt-1 text-sm font-medium text-foreground">{value}</p>
+            <p className="mt-1 text-sm font-medium text-foreground break-words [overflow-wrap:anywhere]">{value}</p>
         </div>
     );
 }

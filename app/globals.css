@@ -87,6 +87,35 @@
     animation: pulse-slow 2s ease-in-out infinite;
   }
 
+  /* Subtle weather panel motion */
+  .weather-card-enter {
+    animation: weather-card-enter 520ms ease-out;
+  }
+
+  .weather-metric-enter {
+    animation: weather-metric-enter 560ms ease-out;
+  }
+
+  .weather-orb {
+    animation: weather-orb 7s ease-in-out infinite;
+  }
+
+  .weather-orb-delay {
+    animation-delay: 1.4s;
+  }
+
+  .weather-float-a {
+    animation: weather-float-a 3.6s ease-in-out infinite;
+  }
+
+  .weather-float-b {
+    animation: weather-float-b 3.1s ease-in-out infinite;
+  }
+
+  .weather-float-c {
+    animation: weather-float-c 2.8s ease-in-out infinite;
+  }
+
   /* Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
@@ -104,5 +133,77 @@
 
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground));
+  }
+}
+
+@keyframes weather-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes weather-metric-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes weather-orb {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    opacity: 0.72;
+    transform: translate3d(0, -10px, 0) scale(1.06);
+  }
+}
+
+@keyframes weather-float-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+
+  50% {
+    transform: translate3d(0, -3px, 0) rotate(3deg);
+  }
+}
+
+@keyframes weather-float-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.72;
+  }
+
+  50% {
+    transform: translate3d(2px, -2px, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes weather-float-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(-1px, 2px, 0) scale(1.08);
   }
 }

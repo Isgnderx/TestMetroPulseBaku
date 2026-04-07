@@ -22,6 +22,13 @@ const FILTERS: Array<{ value: FilterValue; label: string }> = [
     { value: "surge", label: "Surge" },
 ];
 
+interface StationPhotoPayload {
+    data?: {
+        imageUrl?: string;
+        fileName?: string;
+    };
+}
+
 export default function MapPage() {
     const [selectedStation, setSelectedStation] = useState<StationWithDemand | null>(null);
     const [search, setSearch] = useState("");
@@ -29,6 +36,8 @@ export default function MapPage() {
     const [stations, setStations] = useState<StationWithDemand[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+    const [photoLoading, setPhotoLoading] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -71,11 +80,49 @@ export default function MapPage() {
 
     useEffect(() => {
         if (!selectedStation) return;
+
+        // Some map taps resolve to dataset-backed fallback stations (id starts with dataset-).
+        // They won't exist in the stations API list, so keep the panel open for those.
+        if (selectedStation.id.startsWith("dataset-")) return;
+
         const stillExists = stations.some((station) => station.id === selectedStation.id);
         if (!stillExists) {
             setSelectedStation(null);
+            setPhotoUrl(null);
         }
     }, [selectedStation, stations]);
+
+    useEffect(() => {
+        if (!selectedStation) {
+            setPhotoUrl(null);
+            return;
+        }
+
+        let cancelled = false;
+        setPhotoLoading(true);
+
+        fetch(`/api/stations/${selectedStation.slug}/photo`, { cache: "no-store" })
+            .then(async (response) => {
+                if (!response.ok) return null;
+                return (await response.json()) as StationPhotoPayload;
+            })
+            .then((payload) => {
+                if (cancelled) return;
+                setPhotoUrl(payload?.data?.imageUrl ?? null);
+            })
+            .catch(() => {
+                if (cancelled) return;
+                setPhotoUrl(null);
+            })
+            .finally(() => {
+                if (cancelled) return;
+                setPhotoLoading(false);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [selectedStation]);
 
     return (
         <div className="min-h-screen bg-surface-900">
@@ -158,6 +205,25 @@ export default function MapPage() {
                         </div>
                     ) : (
                         <div className="space-y-4">
+                            <div className="overflow-hidden rounded-xl border border-white/10 bg-surface-900/60">
+                                {photoLoading ? (
+                                    <div className="flex h-40 items-center justify-center text-xs text-muted-foreground">
+                                        Loading station photo...
+                                    </div>
+                                ) : photoUrl ? (
+                                    <img
+                                        src={photoUrl}
+                                        alt={`${selectedStation.name} station`}
+                                        className="h-40 w-full object-cover"
+                                        loading="lazy"
+                                    />
+                                ) : (
+                                    <div className="flex h-40 items-center justify-center text-xs text-muted-foreground">
+                                        Station photo unavailable
+                                    </div>
+                                )}
+                            </div>
+
                             <div>
                                 <h2 className="text-lg font-semibold text-foreground">{selectedStation.name}</h2>
                                 <p className="text-xs text-muted-foreground">{selectedStation.nameAz}</p>

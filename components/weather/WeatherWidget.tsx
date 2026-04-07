@@ -49,19 +49,19 @@ export function WeatherWidget({ weather, demandNote, compact, className }: Weath
   }
 
   return (
-    <div className={cn("rounded-xl border border-white/5 bg-surface-800 p-4", className)}>
-      <div className="flex items-start justify-between">
-        <div>
+    <div className={cn("weather-card-enter rounded-xl border border-white/5 bg-surface-800 p-4", className)}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
             Weather · Baku City Center
           </p>
           <div className="flex items-center gap-3">
             <span className="text-3xl">{icon}</span>
-            <div>
+            <div className="min-w-0">
               <p className="text-2xl font-bold text-foreground tabular-nums">
                 {weather.tempC}°C
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
                 Feels like {weather.feelsLikeC}°C · {label}
               </p>
             </div>
@@ -76,8 +76,8 @@ export function WeatherWidget({ weather, demandNote, compact, className }: Weath
       </div>
 
       {demandNote && (
-        <div className="mt-3 rounded-lg bg-surface-600 border border-white/5 px-3 py-2">
-          <p className="text-xs text-muted-foreground leading-relaxed">
+        <div className="mt-3 rounded-lg bg-surface-600 border border-white/5 px-3 py-2 overflow-hidden">
+          <p className="text-xs text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
             <span className="text-metro-blue font-medium">Demand insight: </span>
             {demandNote}
           </p>
@@ -97,10 +97,10 @@ function WeatherStat({
   value: string;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1 rounded-lg bg-surface-600 px-2 py-2">
+    <div className="weather-metric-enter flex min-w-0 flex-col items-center gap-1 rounded-lg bg-surface-600 px-2 py-2 overflow-hidden">
       <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-      <p className="text-xs font-semibold text-foreground">{value}</p>
-      <p className="text-[10px] text-muted-foreground">{label}</p>
+      <p className="text-xs font-semibold text-foreground break-words [overflow-wrap:anywhere] text-center">{value}</p>
+      <p className="text-[10px] text-muted-foreground text-center break-words [overflow-wrap:anywhere]">{label}</p>
     </div>
   );
 }

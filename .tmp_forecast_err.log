@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "C:\Users\loq\Desktop\TestMetroPulseBaku\scripts\generate_station_forecasts.py", line 84, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\loq\Desktop\TestMetroPulseBaku\scripts\generate_station_forecasts.py", line 31, in main
+    model, metadata = load_model_artifact(Path(args.model))
+                      ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\loq\Desktop\TestMetroPulseBaku\scripts\etl\forecasting\persistence.py", line 16, in load_model_artifact
+    payload = joblib.load(path)
+  File "C:\Users\loq\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\joblib\numpy_pickle.py", line 735, in load
+    with open(filename, "rb") as f:
+         ~~~~^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'models\\station_demand_xgb.joblib'

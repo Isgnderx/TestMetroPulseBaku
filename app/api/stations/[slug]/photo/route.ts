@@ -5,7 +5,7 @@ import { latencyMsFromStart, withLatencyHeaders } from "@/lib/latency";
 const DEFAULT_METRO_PHOTO = "28 may.jpg";
 
 const LOCAL_PHOTO_BY_ALIAS: Record<string, string> = {
-    // App slugs
+    // Canonical app slugs
     "20-yanvar": "20 yanvar.jpg",
     "28-may": "28 may.jpg",
     "icheri-sheher": "iceriseher.jpg",
@@ -26,21 +26,28 @@ const LOCAL_PHOTO_BY_ALIAS: Record<string, string> = {
     ahmedli: "ehmedli.jpg",
     hojasan: "xocasen.jpg",
     khatai: "xetai.jpg",
-    "heydar-aliyev": "_8_november__station.png",
+    "8-noyabr": "_8_november__station.png",
+    "azadliq-prospekti": "azadliq.jpg",
+    "jafar-cabbarli": "28 may.jpg",
+    "memar-ajami-2": "ecemi.jpg",
+    nasimi: "nesimi.jpg",
+    neftchilar: "nefciler.jpg",
+    "qara-qarayev": "qara.jpg",
+    "heydar-aliyev": "28 may.jpg",
 
-    // Dataset/fallback slugs from map
+    // Additional aliases seen in upstream data and prior seeds
     icherisheher: "iceriseher.jpg",
     "8-novabr": "_8_november__station.png",
     avtovaghzal: "aftovagzal.jpg",
-    "azadliq-prospekti": "azadliq.jpg",
     "jafar-jabbarly": "28 may.jpg",
-    neftchilar: "nefciler.jpg",
-    nasimi: "nesimi.jpg",
     "gara-garayev": "qara.jpg",
     khojasan: "xocasen.jpg",
     insahatchilar: "inshaatcilar.jpg",
     "shah-ismail-khatai": "xetai.jpg",
     akhmedli: "ehmedli.jpg",
+    "xalqlar-dostlugu": "xalqlar.jpg",
+    "xelqlar-dostlugu": "xalqlar.jpg",
+    "jafar-cabbarly": "28 may.jpg",
 };
 
 function localPhotoUrl(fileName: string): string {
@@ -57,7 +64,7 @@ function normalizeText(input: string): string {
         .replace(/ç/g, "c")
         .replace(/ö/g, "o")
         .replace(/ü/g, "u")
-        .replace(/x/g, "h")
+    .replace(/['`]/g, "")
         .replace(/[^a-z0-9]+/g, " ")
         .trim()
         .replace(/\s+/g, " ");

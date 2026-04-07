@@ -45,6 +45,51 @@ const METRO_LINE_COLORS: Record<MetroLineName, string> = {
     purple: "#7E57C2",
 };
 
+const MAP_INITIAL_CAMERA = {
+    center: [49.8671, 40.4093] as [number, number],
+    zoom: 11.05,
+    pitch: 34,
+    bearing: -6,
+};
+
+const MAP_3D_CAMERA = {
+    center: [49.8671, 40.4093] as [number, number],
+    zoom: 11.35,
+    pitch: 52,
+    bearing: -18,
+};
+
+const BUILDING_TILEJSON_URL = "https://demotiles.maplibre.org/tiles/tiles.json";
+
+interface TileJsonVectorLayer {
+    id?: string;
+}
+
+interface TileJsonResponse {
+    vector_layers?: TileJsonVectorLayer[];
+}
+
+async function detectBuildingSourceLayer(): Promise<string | null> {
+    try {
+        const response = await fetch(BUILDING_TILEJSON_URL, { cache: "force-cache" });
+        if (!response.ok) return null;
+
+        const payload = (await response.json()) as TileJsonResponse;
+        const layerIds = (payload.vector_layers ?? [])
+            .map((layer) => layer.id)
+            .filter((id): id is string => Boolean(id));
+
+        const preferredIds = ["building", "buildings", "building_part", "building:part"];
+        const preferred = preferredIds.find((id) => layerIds.includes(id));
+        if (preferred) return preferred;
+
+        const byNameHint = layerIds.find((id) => /build/i.test(id));
+        return byNameHint ?? null;
+    } catch {
+        return null;
+    }
+}
+
 const STATION_DATA_JSON: RawStation[] = [
     { station_name_en: "20 Yanvar", longitude: 49.807572, latitude: 40.403653 },
     { station_name_en: "28 May", longitude: 49.847822, latitude: 40.381211 },
@@ -225,18 +270,93 @@ export function MetroMap({ stations, selectedStationId, onStationClick, destinat
                 },
                 layers: [{ id: "baku-light", type: "raster", source: "baku-light" }],
             },
-            center: [49.8671, 40.4093],
-            zoom: 11.25,
+            center: MAP_INITIAL_CAMERA.center,
+            zoom: MAP_INITIAL_CAMERA.zoom,
+            pitch: MAP_INITIAL_CAMERA.pitch,
+            bearing: MAP_INITIAL_CAMERA.bearing,
             minZoom: 9,
-            maxZoom: 16,
-            dragRotate: false,
-            pitchWithRotate: false,
+            maxZoom: 17.5,
+            dragRotate: true,
+            pitchWithRotate: true,
             attributionControl: false,
         });
 
-        map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+        map.touchZoomRotate.enableRotation();
+        map.addControl(new maplibregl.NavigationControl({ showCompass: true }), "top-right");
 
-        map.on("load", () => {
+        map.on("load", async () => {
+            map.addSource("terrain-dem", {
+                type: "raster-dem",
+                url: "https://demotiles.maplibre.org/terrain-tiles/tiles.json",
+                tileSize: 256,
+            });
+
+            map.setTerrain({ source: "terrain-dem", exaggeration: 1.25 });
+
+            map.addLayer({
+                id: "terrain-hillshade",
+                type: "hillshade",
+                source: "terrain-dem",
+                layout: {
+                    visibility: "visible",
+                },
+                paint: {
+                    "hillshade-shadow-color": "#4B5563",
+                    "hillshade-highlight-color": "#F8FAFC",
+                    "hillshade-accent-color": "#94A3B8",
+                    "hillshade-exaggeration": 0.25,
+                },
+            });
+
+            map.addSource("osm-buildings", {
+                type: "vector",
+                url: BUILDING_TILEJSON_URL,
+            });
+
+            const buildingSourceLayer = await detectBuildingSourceLayer();
+            if (buildingSourceLayer) {
+                map.addLayer({
+                    id: "3d-buildings",
+                    type: "fill-extrusion",
+                    source: "osm-buildings",
+                    "source-layer": buildingSourceLayer,
+                    minzoom: 12.8,
+                    paint: {
+                        "fill-extrusion-color": [
+                            "interpolate",
+                            ["linear"],
+                            ["coalesce", ["to-number", ["get", "render_height"]], 20],
+                            0,
+                            "#cbd5e1",
+                            30,
+                            "#94a3b8",
+                            80,
+                            "#64748b",
+                        ],
+                        "fill-extrusion-height": [
+                            "interpolate",
+                            ["linear"],
+                            ["zoom"],
+                            12.8,
+                            0,
+                            14.8,
+                            [
+                                "coalesce",
+                                ["to-number", ["get", "render_height"]],
+                                ["*", ["coalesce", ["to-number", ["get", "building:levels"]], 4], 3],
+                            ],
+                        ],
+                        "fill-extrusion-base": [
+                            "coalesce",
+                            ["to-number", ["get", "render_min_height"]],
+                            0,
+                        ],
+                        "fill-extrusion-opacity": 0.92,
+                        "fill-extrusion-vertical-gradient": true,
+                    },
+                });
+            }
+
             map.addSource("metro-lines", {
                 type: "geojson",
                 data: { type: "FeatureCollection", features: [] },
@@ -399,6 +519,18 @@ export function MetroMap({ stations, selectedStationId, onStationClick, destinat
                 }
             };
 
+            const selectByLinkedStationId = (linkedStationId: string) => {
+                if (!linkedStationId) return;
+
+                const station =
+                    stationLookupRef.current.get(linkedStationId) ??
+                    stationsRef.current.find((item) => item.id === linkedStationId);
+
+                if (station) {
+                    onStationClickRef.current?.(station);
+                }
+            };
+
             map.on("click", "station-hitarea", handleStationSelect);
             map.on("click", "station-circles", handleStationSelect);
             map.on("click", "station-interchange-second-ring", handleStationSelect);
@@ -411,7 +543,44 @@ export function MetroMap({ stations, selectedStationId, onStationClick, destinat
                 map.getCanvas().style.cursor = "";
             });
 
+            // Fallback tap/click handling: query nearby station features so taps on labels
+            // and slightly off-center touches still open the station info panel.
+            map.on("click", (event) => {
+                const point = event.point;
+                const hitFeatures = map.queryRenderedFeatures(
+                    [
+                        [point.x - 18, point.y - 18],
+                        [point.x + 18, point.y + 18],
+                    ],
+                    {
+                        layers: [
+                            "station-hitarea",
+                            "station-circles",
+                            "station-interchange-second-ring",
+                            "station-labels",
+                        ],
+                    }
+                );
+
+                const firstLinkedId = hitFeatures
+                    .map((feature) => (feature.properties?.linkedStationId as string | undefined) ?? "")
+                    .find((value) => value.length > 0);
+
+                if (firstLinkedId) {
+                    selectByLinkedStationId(firstLinkedId);
+                }
+            });
+
             syncSources(map, resolvedMapDataRef.current);
+
+            map.easeTo({
+                center: MAP_3D_CAMERA.center,
+                zoom: MAP_3D_CAMERA.zoom,
+                pitch: MAP_3D_CAMERA.pitch,
+                bearing: MAP_3D_CAMERA.bearing,
+                duration: 1400,
+                essential: true,
+            });
         });
 
         mapRef.current = map;
