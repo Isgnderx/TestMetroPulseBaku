@@ -1,0 +1,43 @@
+name: Daily Pipeline
+
+on:
+  schedule:
+    # Runs at 03:00 UTC daily (after Baku Metro closes at ~midnight AZT)
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      station:
+        description: "Station slug to run for (default: all)"
+        required: false
+        default: "all"
+      skip_weather:
+        description: "Skip weather ingestion"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  pipeline:
+    name: Run ETL Pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run full pipeline
+        run: |
+          python scripts/run_pipeline.py \
+            --station ${{ github.event.inputs.station || 'all' }} \
+            --weather-source api
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OPENWEATHER_KEY: ${{ secrets.OPENWEATHER_KEY }}

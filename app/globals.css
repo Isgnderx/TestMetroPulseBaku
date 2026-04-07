@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 5%;
+    --foreground: 210 40% 96%;
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 96%;
+    --border: 217 33% 16%;
+    --input: 217 33% 16%;
+    --ring: 212 100% 60%;
+    --primary: 212 100% 60%;
+    --primary-foreground: 222 47% 5%;
+    --secondary: 217 33% 16%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 55%;
+    --accent: 217 33% 16%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 96%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-tap-highlight-color: transparent;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(33, 150, 243, 0.08), transparent 28%),
+      radial-gradient(circle at 85% 90%, rgba(230, 57, 70, 0.08), transparent 24%);
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* MapLibre overrides */
+  .maplibregl-canvas {
+    outline: none;
+    touch-action: pan-x pan-y;
+  }
+
+  .maplibregl-ctrl-logo {
+    display: none !important;
+  }
+
+  @media (max-width: 768px) {
+
+    input,
+    select,
+    textarea,
+    button {
+      font-size: 16px;
+    }
+  }
+}
+
+@layer components {
+
+  /* Glass card effect */
+  .glass-card {
+    @apply bg-surface-700/60 backdrop-blur-md border border-white/5 rounded-xl;
+  }
+
+  /* Shimmer skeleton */
+  .skeleton {
+    background: linear-gradient(90deg,
+        hsl(var(--muted)) 25%,
+        hsl(var(--secondary)) 50%,
+        hsl(var(--muted)) 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+  }
+
+  /* Demand pulse animation for markers */
+  .demand-pulse {
+    animation: pulse-slow 2s ease-in-out infinite;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}

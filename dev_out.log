@@ -1,0 +1,19 @@
+
+> metropulse-baku@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.1.0
+   - Local:        http://localhost:3005
+   - Network:      http://172.24.64.1:3005
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1911m   Reload env: .env.local
+� Compiled / in 6.3s (702 modules)
+ ○ Compiling /api/weather/current ...
+ ✓ Compiled /api/weather/current in 3.5s (748 modules)
+ GET /api/weather/current 500 in 3193ms
+ GET /api/stations 500 in 3205ms
+ GET / 200 in 10077ms
+   Reload env: .env.local
+ ✓ Compiled in 2.3s (330 modules)

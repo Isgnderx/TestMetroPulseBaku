@@ -1,0 +1,54 @@
+{
+  "name": "MetroPulse Baku",
+  "short_name": "MetroPulse",
+  "description": "Station demand intelligence for Baku Metro — forecasts, crowd patterns, and best exit recommendations.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0D14",
+  "theme_color": "#0A0D14",
+  "orientation": "portrait-primary",
+  "categories": ["travel", "utilities"],
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "MetroPulse Baku home screen — demand leaderboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Live Map",
+      "short_name": "Map",
+      "url": "/map",
+      "description": "Open the interactive metro demand map"
+    },
+    {
+      "name": "Leaderboard",
+      "short_name": "Rankings",
+      "url": "/leaderboard",
+      "description": "Today's station demand ranking"
+    },
+    {
+      "name": "Compare Stations",
+      "short_name": "Compare",
+      "url": "/compare",
+      "description": "Side-by-side station demand comparison"
+    }
+  ]
+}

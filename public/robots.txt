@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Don't index API routes
+Disallow: /api/
+
+Sitemap: https://metropulse-baku.vercel.app/sitemap.xml

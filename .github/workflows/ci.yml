@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ─── Next.js lint + build ─────────────────────────────────────────────────────
+  nextjs:
+    name: Next.js Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+  # ─── Python ETL scripts ───────────────────────────────────────────────────────
+  python:
+    name: Python ETL Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Dry-run pipeline
+        run: python scripts/run_pipeline.py --dry-run --skip-weather
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Test station normalizer
+        run: |
+          python scripts/normalize_stations.py --name "28 May"
+          python scripts/normalize_stations.py --name "Nizami"
+          python scripts/normalize_stations.py --name "İçəri Şəhər"
