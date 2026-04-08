@@ -161,6 +161,7 @@
 }
 
 @keyframes weather-orb {
+
   0%,
   100% {
     opacity: 0.45;
@@ -174,6 +175,7 @@
 }
 
 @keyframes weather-float-a {
+
   0%,
   100% {
     transform: translate3d(0, 0, 0) rotate(0deg);
@@ -185,6 +187,7 @@
 }
 
 @keyframes weather-float-b {
+
   0%,
   100% {
     transform: translate3d(0, 0, 0);
@@ -198,6 +201,7 @@
 }
 
 @keyframes weather-float-c {
+
   0%,
   100% {
     transform: translate3d(0, 0, 0) scale(1);

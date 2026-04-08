@@ -161,7 +161,7 @@ export const MOCK_STATIONS: Station[] = [
     slug: "avtovagzal",
     name: "Avtovağzal",
     nameAz: "Avtovağzal",
-    line: "green",
+    line: "purple",
     lat: 40.4289,
     lon: 49.8231,
     stationType: "transfer",
@@ -174,7 +174,7 @@ export const MOCK_STATIONS: Station[] = [
     slug: "memar-ajami",
     name: "Memar Əcəmi",
     nameAz: "Memar Əcəmi",
-    line: "green",
+    line: "purple",
     lat: 40.4089,
     lon: 49.8173,
     stationType: "mixed",
@@ -252,25 +252,11 @@ export const MOCK_STATIONS: Station[] = [
     slug: "hojasan",
     name: "Khojasan",
     nameAz: "Khojasan",
-    line: "green",
+    line: "purple",
     lat: 40.3389,
     lon: 49.7956,
     stationType: "residential",
     openedYear: 1985,
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z",
-  },
-  // Purple Line
-  {
-    id: "st-019",
-    slug: "heydar-aliyev",
-    name: "Heydər Əliyev",
-    nameAz: "Heydər Əliyev",
-    line: "purple",
-    lat: 40.4512,
-    lon: 50.0089,
-    stationType: "tourist",
-    openedYear: 2016,
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
   },
@@ -305,7 +291,7 @@ export const MOCK_STATIONS: Station[] = [
     slug: "8-noyabr",
     name: "8 Noyabr",
     nameAz: "8 Noyabr",
-    line: "green",
+    line: "purple",
     lat: 40.3981,
     lon: 49.8474,
     stationType: "mixed",
@@ -415,7 +401,6 @@ const STATION_BASELINES: Record<string, number> = {
   "st-016": 8900, // Xalqlar Dostluğu
   "st-017": 9400, // Əhmədli
   "st-018": 7800, // Khojasan
-  "st-019": 11700, // Heydər Əliyev – airport/tourist
   "st-020": 12800, // Xətai
   "st-021": 50800, // 20 Yanvar
   "st-022": 25600, // 8 Noyabr
@@ -447,7 +432,6 @@ const TODAY_DELTAS: Record<string, number> = {
   "st-016": -3,
   "st-017": 9,
   "st-018": -22,
-  "st-019": 38,
   "st-020": 11,
   "st-021": 26,
   "st-022": 14,

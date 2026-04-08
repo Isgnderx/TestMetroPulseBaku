@@ -156,8 +156,8 @@ export default function MapPage() {
                                         aria-pressed={filter === item.value}
                                         aria-label={`Filter stations by ${item.label}`}
                                         className={`rounded-md px-2 py-1 text-xs transition ${filter === item.value
-                                                ? "bg-metro-blue/30 text-foreground"
-                                                : "text-muted-foreground hover:text-foreground"
+                                            ? "bg-metro-blue/30 text-foreground"
+                                            : "text-muted-foreground hover:text-foreground"
                                             }`}
                                     >
                                         {item.label}

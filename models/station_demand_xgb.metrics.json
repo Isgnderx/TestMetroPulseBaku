@@ -1,0 +1,37 @@
+{
+  "trained_at": "2026-04-08T09:10:37.179743+00:00",
+  "model_name": "xgboost-station-demand",
+  "model_version": "2.0.0",
+  "station_scope": "all",
+  "features": [
+    "day_of_week",
+    "is_weekend",
+    "month",
+    "day_of_year",
+    "lag_1",
+    "lag_7",
+    "rolling_avg_7",
+    "rolling_avg_14",
+    "rolling_std_7",
+    "temperature",
+    "humidity",
+    "precipitation",
+    "wind_speed",
+    "station_id",
+    "station_type"
+  ],
+  "rows_train": 8658,
+  "rows_validation": 2184,
+  "metrics": {
+    "baseline_mae": 3307.722802197802,
+    "baseline_mape": 19.155317891062438,
+    "xgb_mae": 2343.910273541461,
+    "xgb_mape": 15.11711330883528
+  },
+  "residual_std": 4820.098496254374,
+  "neutral_weather": {
+    "temperature": 15.0,
+    "humidity": 70.0,
+    "wind_speed": 10.0
+  }
+}

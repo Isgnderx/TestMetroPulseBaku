@@ -365,11 +365,12 @@ export async function getStationForecastPayload(
 
     const today = new Date().toISOString().slice(0, 10);
     const client = createServiceClient();
-    const { data, error } = await client
+    const forecastSelect =
+        "id,station_id,forecast_date,predicted_entries,lower_bound,upper_bound,model_name,model_version,confidence_level,weather_effect_score,baseline_entries,rider_facing_note,created_at,updated_at";
+
+    const { data: upcomingData, error } = await client
         .from("station_forecasts")
-        .select(
-            "id,station_id,forecast_date,predicted_entries,lower_bound,upper_bound,model_name,model_version,confidence_level,weather_effect_score,baseline_entries,rider_facing_note,created_at,updated_at"
-        )
+        .select(forecastSelect)
         .eq("station_id", station.id)
         .gte("forecast_date", today)
         .order("forecast_date", { ascending: true })
@@ -378,7 +379,22 @@ export async function getStationForecastPayload(
 
     if (error) throw new Error(error.message);
 
-    const forecast = (data ?? []).map(mapForecastWithContext);
+    let forecastRows = upcomingData ?? [];
+
+    if (forecastRows.length === 0) {
+        const { data: latestAvailable, error: latestError } = await client
+            .from("station_forecasts")
+            .select(forecastSelect)
+            .eq("station_id", station.id)
+            .order("forecast_date", { ascending: false })
+            .limit(7)
+            .returns<ForecastRow[]>();
+
+        if (latestError) throw new Error(latestError.message);
+        forecastRows = (latestAvailable ?? []).slice().reverse();
+    }
+
+    const forecast = forecastRows.map(mapForecastWithContext);
 
     const primaryForecast = forecast[0];
     const bestTime = await getStationBestTimePayload(slug);

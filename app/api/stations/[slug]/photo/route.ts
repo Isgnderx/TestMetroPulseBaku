@@ -33,7 +33,6 @@ const LOCAL_PHOTO_BY_ALIAS: Record<string, string> = {
     nasimi: "nesimi.jpg",
     neftchilar: "nefciler.jpg",
     "qara-qarayev": "qara.jpg",
-    "heydar-aliyev": "28 may.jpg",
 
     // Additional aliases seen in upstream data and prior seeds
     icherisheher: "iceriseher.jpg",
@@ -64,7 +63,7 @@ function normalizeText(input: string): string {
         .replace(/ç/g, "c")
         .replace(/ö/g, "o")
         .replace(/ü/g, "u")
-    .replace(/['`]/g, "")
+        .replace(/['`]/g, "")
         .replace(/[^a-z0-9]+/g, " ")
         .trim()
         .replace(/\s+/g, " ");

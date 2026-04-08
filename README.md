@@ -63,8 +63,10 @@ cp .env.example .env.local
 | Variable | Required | Description |
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Your Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon/public key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (server-side only) |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Yes | Supabase publishable key for browser and SSR clients |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Legacy fallback | Older anon/public key name still accepted by the app |
+| `SUPABASE_SECRET_KEY` | Yes | Supabase secret key for secure server-side access |
+| `SUPABASE_SERVICE_ROLE_KEY` | Legacy fallback | Older server-side elevated key still accepted by the app |
 | `DATABASE_URL` | Python scripts only | Full PostgreSQL connection string |
 | `OPENWEATHER_KEY` | Optional | OpenWeatherMap API key for live weather |
 | `NEXT_PUBLIC_MAPBOX_TOKEN` | Optional | Only needed if replacing OSM tiles with Mapbox |

@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { getRequiredEnv } from "@/lib/env";
+import { getOptionalEnv, getRequiredEnv } from "@/lib/env";
 
 type SupabaseClient = ReturnType<typeof createClient>;
 
@@ -7,16 +7,22 @@ function getSupabaseBaseConfig() {
   const supabaseUrl = getRequiredEnv("NEXT_PUBLIC_SUPABASE_URL", {
     example: "https://your-project.supabase.co",
   });
-  const supabaseAnonKey = getRequiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", {
-    example: "eyJhbGciOiJI...",
-  });
+  const supabasePublishableKey =
+    getOptionalEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY") ??
+    getOptionalEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 
-  return { supabaseUrl, supabaseAnonKey };
+  if (!supabasePublishableKey) {
+    throw new Error(
+      "Missing required environment variable NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY. Add one to your environment configuration."
+    );
+  }
+
+  return { supabaseUrl, supabasePublishableKey };
 }
 
 export function createAnonClient() {
-  const { supabaseUrl, supabaseAnonKey } = getSupabaseBaseConfig();
-  return createClient(supabaseUrl, supabaseAnonKey);
+  const { supabaseUrl, supabasePublishableKey } = getSupabaseBaseConfig();
+  return createClient(supabaseUrl, supabasePublishableKey);
 }
 
 // Lazy proxy keeps import-time safe during build while preserving runtime env validation.
@@ -34,13 +40,19 @@ export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
 // Server-side client with service role (for ETL / admin routes)
 export function createServiceClient() {
   const { supabaseUrl } = getSupabaseBaseConfig();
-  const serviceRoleKey = getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY", {
-    example: "eyJhbGciOiJI...",
-  });
+  const serviceKey =
+    getOptionalEnv("SUPABASE_SECRET_KEY") ??
+    getOptionalEnv("SUPABASE_SERVICE_ROLE_KEY");
+
+  if (!serviceKey) {
+    throw new Error(
+      "Missing required environment variable SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY. Add one to your environment configuration."
+    );
+  }
 
   return createClient(
     supabaseUrl,
-    serviceRoleKey,
+    serviceKey,
     { auth: { persistSession: false } }
   );
 }

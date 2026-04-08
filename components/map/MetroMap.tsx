@@ -177,6 +177,13 @@ const LINE_KEY_TO_PRIMARY: Record<keyof typeof lineDefinitions, MetroLineName> =
     redBranch: "red",
 };
 
+const FORCE_PRIMARY_LINE_BY_STATION: Record<string, MetroLineName> = {
+    "8 Noyabr": "purple",
+    "Memar Ajami": "purple",
+    Avtovaghzal: "purple",
+    Khojasan: "purple",
+};
+
 const DATASET_NAME_TO_APP_SLUG: Record<string, string> = {
     "20 Yanvar": "20-yanvar",
     "28 May": "28-may",
@@ -618,8 +625,11 @@ export function MetroMap({ stations, selectedStationId, onStationClick, destinat
                 appStationByName.get(normalizeName(item.station_name_en));
 
             const lines = lineMembership.get(item.station_name_en) ?? [];
-            const primaryLine = lines[0] ?? "red";
-            const secondaryLine = lines[1] ?? null;
+            const forcedPrimary = FORCE_PRIMARY_LINE_BY_STATION[item.station_name_en];
+            const primaryLine = forcedPrimary ?? lines[0] ?? "red";
+            const secondaryLine =
+                lines.find((line) => line !== primaryLine) ??
+                (forcedPrimary ? null : lines[1] ?? null);
 
             const fallbackId = `dataset-${normalizeName(item.station_name_en).replace(/\s+/g, "-")}`;
             const linkedStation: StationWithDemand =

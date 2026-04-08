@@ -8,6 +8,8 @@ import { fetchApi } from "@/lib/api/fetcher";
 import { getServerApiUrl } from "@/lib/api/server-url";
 import { LeaderboardContract } from "@/types/contracts";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Station Leaderboard – Today's Demand Ranking",
 };
@@ -27,6 +29,12 @@ function emptyLeaderboardData(): LeaderboardContract["leaderboard"] {
   };
 }
 
+function isForecastUnavailable(
+  entry: LeaderboardContract["leaderboard"]["entries"][number]
+) {
+  return entry.todayForecast <= 0 && entry.baseline <= 0;
+}
+
 async function fetchLeaderboardData(): Promise<LeaderboardFetchResult> {
   try {
     const timeoutMs = getDemoTimeoutMs(7000);
@@ -35,7 +43,7 @@ async function fetchLeaderboardData(): Promise<LeaderboardFetchResult> {
     const result = await withTimeout(
       () =>
         fetchApi<LeaderboardContract>(url, {
-          next: { revalidate: 60 * 30 },
+          cache: "no-store",
         }),
       timeoutMs,
       "Leaderboard fetch timeout"
@@ -68,10 +76,11 @@ export default async function LeaderboardPage() {
   const { data, status, note, freshnessLabel } = await fetchLeaderboardData();
   const entries = data.entries;
 
-  const surge = entries.filter(e => e.demandLevel === "surge").length;
-  const high = entries.filter(e => e.demandLevel === "high").length;
-  const normal = entries.filter(e => e.demandLevel === "normal").length;
-  const low = entries.filter(e => e.demandLevel === "low").length;
+  const surge = entries.filter(e => !isForecastUnavailable(e) && e.demandLevel === "surge").length;
+  const high = entries.filter(e => !isForecastUnavailable(e) && e.demandLevel === "high").length;
+  const normal = entries.filter(e => !isForecastUnavailable(e) && e.demandLevel === "normal").length;
+  const low = entries.filter(e => !isForecastUnavailable(e) && e.demandLevel === "low").length;
+  const unavailable = entries.filter(isForecastUnavailable).length;
 
   return (
     <div className="min-h-screen bg-surface-900">
@@ -102,6 +111,12 @@ export default async function LeaderboardPage() {
               {note ?? "Live leaderboard data is temporarily unavailable."}
             </p>
           )}
+          {unavailable > 0 && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {unavailable} station forecast{unavailable === 1 ? "" : "s"} unavailable because
+              source data is still missing.
+            </p>
+          )}
         </div>
 
         {/* Summary chips */}
@@ -124,7 +139,10 @@ export default async function LeaderboardPage() {
 
         {/* Rows */}
         <div className="space-y-2.5">
-          {entries.map(entry => (
+          {entries.map(entry => {
+            const forecastUnavailable = isForecastUnavailable(entry);
+
+            return (
             <Link key={entry.station.id} href={`/station/${entry.station.slug}`}>
               <div className="group grid cursor-pointer grid-cols-1 items-center gap-2 rounded-xl border border-white/5 bg-surface-800 px-4 py-3.5 transition-all hover:border-white/10 hover:bg-surface-700 sm:grid-cols-[40px_1fr_120px_100px_100px_120px] sm:gap-4">
                 {/* Rank */}
@@ -139,7 +157,7 @@ export default async function LeaderboardPage() {
                   </div>
                   <div
                     className="h-2 w-2 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: demandColor(entry.demandLevel) }}
+                    style={{ backgroundColor: forecastUnavailable ? "#64748b" : demandColor(entry.demandLevel) }}
                   />
                   <div>
                     <p className="text-sm font-semibold text-foreground group-hover:text-foreground">
@@ -152,24 +170,30 @@ export default async function LeaderboardPage() {
                 {/* Forecast */}
                 <div className="sm:text-right">
                   <span className="text-sm font-bold text-foreground tabular-nums">
-                    {formatNumber(entry.todayForecast)}
+                    {forecastUnavailable ? "N/A" : formatNumber(entry.todayForecast)}
                   </span>
                   <p className="text-[10px] text-muted-foreground sm:hidden">forecast entries</p>
                   <div className="mt-1 flex items-center gap-2 sm:hidden">
-                    <span
-                      className="text-[11px] font-semibold tabular-nums"
-                      style={{ color: demandColor(entry.demandLevel) }}
-                    >
-                      {formatDelta(entry.deltaPercent)}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">{entry.demandLabel}</span>
+                    {forecastUnavailable ? (
+                      <span className="text-[10px] text-muted-foreground">Forecast unavailable</span>
+                    ) : (
+                      <>
+                        <span
+                          className="text-[11px] font-semibold tabular-nums"
+                          style={{ color: demandColor(entry.demandLevel) }}
+                        >
+                          {formatDelta(entry.deltaPercent)}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">{entry.demandLabel}</span>
+                      </>
+                    )}
                   </div>
                 </div>
 
                 {/* Baseline */}
                 <div className="hidden sm:block text-right">
                   <span className="text-sm text-muted-foreground tabular-nums">
-                    {formatNumber(entry.baseline)}
+                    {forecastUnavailable ? "N/A" : formatNumber(entry.baseline)}
                   </span>
                 </div>
 
@@ -177,33 +201,46 @@ export default async function LeaderboardPage() {
                   <div className="rounded-md border border-white/10 bg-surface-900/50 px-2 py-1.5">
                     <p className="text-muted-foreground">Baseline</p>
                     <p className="mt-0.5 text-xs font-semibold text-foreground tabular-nums">
-                      {formatNumber(entry.baseline)}
+                      {forecastUnavailable ? "N/A" : formatNumber(entry.baseline)}
                     </p>
                   </div>
                   <div className="rounded-md border border-white/10 bg-surface-900/50 px-2 py-1.5">
                     <p className="text-muted-foreground">Status</p>
-                    <p className="mt-0.5 text-xs font-semibold text-foreground">{entry.demandLabel}</p>
+                    <p className="mt-0.5 text-xs font-semibold text-foreground">
+                      {forecastUnavailable ? "Forecast unavailable" : entry.demandLabel}
+                    </p>
                   </div>
                 </div>
 
                 {/* Delta */}
                 <div className="hidden sm:flex items-center justify-end gap-1">
-                  <DeltaIcon delta={entry.deltaPercent} />
-                  <span
-                    className="text-sm font-semibold tabular-nums"
-                    style={{ color: demandColor(entry.demandLevel) }}
-                  >
-                    {formatDelta(entry.deltaPercent)}
-                  </span>
+                  {forecastUnavailable ? (
+                    <span className="text-sm font-semibold text-muted-foreground">N/A</span>
+                  ) : (
+                    <>
+                      <DeltaIcon delta={entry.deltaPercent} />
+                      <span
+                        className="text-sm font-semibold tabular-nums"
+                        style={{ color: demandColor(entry.demandLevel) }}
+                      >
+                        {formatDelta(entry.deltaPercent)}
+                      </span>
+                    </>
+                  )}
                 </div>
 
                 {/* Status */}
                 <div className="sm:flex items-center justify-end hidden">
-                  <DemandBadge level={entry.demandLevel} label={entry.demandLabel} />
+                  {forecastUnavailable ? (
+                    <span className="text-xs text-muted-foreground">Forecast unavailable</span>
+                  ) : (
+                    <DemandBadge level={entry.demandLevel} label={entry.demandLabel} />
+                  )}
                 </div>
               </div>
             </Link>
-          ))}
+            );
+          })}
           {entries.length === 0 && (
             <div className="rounded-xl border border-white/5 bg-surface-800 px-4 py-6 text-center">
               <p className="text-sm text-foreground font-medium">
