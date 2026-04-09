@@ -263,4 +263,4 @@ Note: This module can also be deployed as an independent subsystem.
 
 ## License
 
-MIT
+MIT License
